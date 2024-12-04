@@ -23,6 +23,13 @@ func count[T any](list []T, pred func(T) bool) int {
 	return count
 }
 
+func remove(orig []int, i int) []int {
+	res := make([]int, len(orig)-1)
+	copy(res, orig[:i])
+	copy(res[i:], orig[i+1:])
+	return res
+}
+
 func parse(input string) [][]int {
 	reports := [][]int{}
 
@@ -39,7 +46,9 @@ func parse(input string) [][]int {
 	return reports
 }
 
-func isSafe(report []int) bool {
+// if safe, returns true and meaningless value
+// if not, returns false and the index where the report was found to not be safe
+func isSafe(report []int) (bool, int) {
 	prev, curr := 0, 0
 	for i, val := range report {
 		// report is safe iff:
@@ -53,11 +62,16 @@ func isSafe(report []int) bool {
 		badDirection := i > 1 && ((curr-prev)*(val-curr) <= 0)
 		if badMagnitude || badDirection {
 			//fmt.Printf("determined unsafe with prev=%d, curr=%d, val=%d\n", prev, curr, val)
-			return false
+			return false, i
 		}
 		prev, curr = curr, val
 	}
-	return true
+	return true, 0
+}
+
+func isSafeBool(report []int) bool {
+	safe, _ := isSafe(report)
+	return safe
 }
 
 func isSafeWithDampener(report []int) bool {
@@ -74,24 +88,20 @@ func isSafeWithDampener(report []int) bool {
 	//   * example: 8 6 3 5 4 forms V shape with (6 3 5) and we need to remove the 3
 	//   * example: 8 6 3 7 2 forms V shape with (6 3 7) and we need to remove the 7
 	// something should be possible along the lines of choosing the "best" value to keep out of the trio
-	if isSafe(report) {
+	isSafe, i := isSafe(report)
+	if isSafe {
 		return true
 	} else {
-		for i := range report {
-			trimmed := make([]int, len(report)-1)
-			copy(trimmed, report[:i])
-			copy(trimmed[i:], report[i+1:])
-			if isSafe(trimmed) {
-				return true
-			}
-		}
-		return false
+		return isSafeBool(remove(report, i-1)) || isSafeBool(remove(report, i)) || isSafeBool(remove(report, 0))
 	}
 }
 
 func part1() {
 	reports := parse(input)
-	count := count(reports, isSafe)
+	count := count(reports, func(r []int) bool {
+		isSafe, _ := isSafe(r)
+		return isSafe
+	})
 	fmt.Println("number of safe reports:", count)
 }
 
