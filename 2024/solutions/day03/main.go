@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
-	"strconv"
+	"regexp"
 	"strings"
 
 	_ "embed"
@@ -14,6 +14,10 @@ import (
 
 //go:embed input
 var input string
+
+var mulRegex = regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
+var doRegex = regexp.MustCompile(`do\(\)`)
+var dontRegex = regexp.MustCompile(`don't\(\)`)
 
 // shamelessly stolen from: https://pkg.go.dev/container/heap#Interface
 // A TokenHeap is a min-heap of tokens.
@@ -47,71 +51,26 @@ const (
 type Token struct {
 	index int
 	ttype TokenType
+	// fields below should only be used for Mul instructions
+	first int
+	second int
 }
 
-func findAllLocations(line string, query string) []int {
-	var locations []int
-	for i := range line {
-		found := true
-
-		for j := range query {
-			if (i+j) >= len(line) || line[i+j] != query[j] {
-				found = false
-				break
-			}
-		}
-			
-		if found {
-			locations = append(locations, i)
-		}
-	}
-	return locations
-}
-
-// try to process a single mul instruction starting at index i, return result or 0 if no valid instruction
-func tryProcess(line string, i int) int {
-	// mul(123,)
-	// ^i      ^end
-	end := min(len(line), i+8)
-	searchWindow := line[i+4:end]
-	commaLoc := strings.Index(searchWindow, ",")
-	if commaLoc == -1 {
-		return 0
-	} 
-
-	first, err := strconv.Atoi(searchWindow[:commaLoc])
-	if err != nil {
-		//fmt.Printf("error: %v\n", err)
-		return 0
-	}
-
-	// index AFTER comma within line
-	start := i+5+commaLoc
-	// mul(123,939) 
-	//         ^s  ^end
-	end = min(len(line), start+4)
-	searchWindow = line[start:end]
-	closeLoc := strings.Index(searchWindow, ")")
-	if closeLoc == -1 {
-		return 0
-	}
-
-	second, err := strconv.Atoi(searchWindow[:closeLoc])
-	if err != nil {
-		//fmt.Printf("error: %v\n", err)
-		return 0
-	}
-
-	return first * second
+// match: output of FindAllStringSubmatchIndex on a string
+// submatchIndex: submatch index where 0 is the full match, 1 is first submatch etc.
+func getSubmatchString(str string, match []int, submatchIndex int) string {
+	submatchIndices := match[2*submatchIndex:2*submatchIndex+2]
+	return str[submatchIndices[0]:submatchIndices[1]]
 }
 
 // return the result of processing valid mul instructions within the line
 func process(line string) int {
 	total := 0
-	locs := findAllLocations(line, "mul(")
+	locs := mulRegex.FindAllStringSubmatch(line, -1)
 
-	for _, i := range locs {
-		total += tryProcess(line, i)
+	for _, match := range locs {
+		first, second := util.MustAtoi(match[1]), util.MustAtoi(match[2])
+		total += (first * second)
 	}
 
 	return total
@@ -122,29 +81,32 @@ func process(line string) int {
 func processWithToggles(line string, enabled bool) (int, bool) {
 	total := 0
 
-	multLocs := findAllLocations(line, "mul(")
-	dos := findAllLocations(line, "do()")
-	donts := findAllLocations(line, "don't()")
+	multLocs := mulRegex.FindAllStringSubmatchIndex(line, -1)
+	dos := doRegex.FindAllStringIndex(line, -1)
+	donts := dontRegex.FindAllStringIndex(line, -1)
 
 	pq := &TokenHeap{}
-	for _, loc := range multLocs {
-		heap.Push(pq, Token{loc, Mul})
+	for _, match := range multLocs {
+		index := match[0]
+		first := util.MustAtoi(getSubmatchString(line, match, 1))
+		second := util.MustAtoi(getSubmatchString(line, match, 2))
+		heap.Push(pq, Token{index: index, ttype: Mul, first: first, second: second})
 	}
-	for _, loc := range dos {
-		heap.Push(pq, Token{loc, Do})
+	for _, match := range dos {
+		heap.Push(pq, Token{index: match[0], ttype: Do})
 	}
-	for _, loc := range donts {
-		heap.Push(pq, Token{loc, Dont})
+	for _, match := range donts {
+		heap.Push(pq, Token{index: match[0], ttype: Dont})
 	}
 
 	for pq.Len() > 0 {
-		token := heap.Pop(pq)
-		ttype := token.(Token).ttype
+		token := heap.Pop(pq).(Token)
+		ttype := token.ttype
 
 		switch ttype {
 		case Mul:
 			if enabled {
-				total += tryProcess(line, token.(Token).index)
+				total += (token.first * token.second)
 			}
 		case Do:
 			enabled = true
