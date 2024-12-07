@@ -71,69 +71,56 @@ func move(pos [2]int, dir complex64) [2]int {
 	return [2]int{pos[0] + int(real(dir)), pos[1] + int(imag(dir))}
 }
 
-func solve(problem PuzzleInput, p2 bool) (int, bool) {
-	ans := 0
+// returns: (set of positions visited), (if the walker looped)
+func walk(problem PuzzleInput) (map[[2]int]util.Set[complex64], bool) {
 	visited := make(map[[2]int]util.Set[complex64])
-	loopObstacles := make(util.Set[[2]int])
 
-	pos := problem.startPos
-	//fmt.Printf("starting at %v\n", pos)
 	// represent orientation as complex number w/ real part in row-axis and imaginary part in col-axis
 	// i.e. "up" -> reduce row by 1 -> -1
+	pos := problem.startPos
 	var direction complex64 = -1
-	for !visited[pos].Has(direction) {
-		// check if we're visiting a coordinate for the first time
+	for problem.InBounds(pos) && !visited[pos].Has(direction) {
 		if _, ok := visited[pos]; !ok {
-			if !p2 {
-				ans++
-			}
 			visited[pos] = make(util.Set[complex64])
 		}
 		visited[pos].Add(direction)
 
-		// move
 		nextPos := move(pos, direction)
-		if !problem.InBounds(nextPos) {
-			//fmt.Printf("going out of bounds to %v\n", nextPos)
-			return ans, false
-		}
-
-		if problem.Get(nextPos) == Obstacle {
-			// turn right 90 degrees
+		if problem.InBounds(nextPos) && problem.Get(nextPos) == Obstacle {
 			direction *= -1i
-			//fmt.Printf("rotating to face %v\n", direction)
 		} else {
-			// check if rotating at this point would have resulted in a loop
-			if p2 && problem.Get(nextPos) != StartPos {
-				problem.Set(nextPos, Obstacle)
-
-				_, wouldLoop := solve(problem, false)
-				if wouldLoop && !loopObstacles.Has(nextPos) {
-					loopObstacles.Add(nextPos)
-					ans++
-				}
-
-				problem.Set(nextPos, Empty)
-			}
-
 			pos = nextPos
-			//fmt.Printf("moving to %v\n", pos)
 		}
+
 	}
 
-	return ans, true
+	return visited, problem.InBounds(pos)
 }
 
 func part1() {
 	problem := Parse(input)
-	ans, _ := solve(problem, false)
-	fmt.Println("answer:", ans)
+	path, _ := walk(problem)
+	fmt.Println("answer:", len(path))
 }
 
 func part2() {
 	problem := Parse(input)
-	ans, _ := solve(problem, true)
-	fmt.Println("answer:", ans)
+	path, _ := walk(problem)
+
+	count := 0
+	for pos := range path {
+		// check if rotating at this point would have resulted in a loop
+		if problem.Get(pos) == StartPos {
+			continue
+		}
+		problem.Set(pos, Obstacle)
+		if _, wouldLoop := walk(problem); wouldLoop {
+			count++
+		}
+		problem.Set(pos, Empty)
+	}
+
+	fmt.Println("answer:", count)
 }
 
 func main() {
