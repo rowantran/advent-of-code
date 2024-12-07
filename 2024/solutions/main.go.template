@@ -1,0 +1,41 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"slices"
+	"strings"
+
+	_ "embed"
+
+	"github.com/rowantran/advent-of-code/2024/util"
+)
+
+//go:embed input
+var input string
+
+type PuzzleInput struct {}
+
+func Parse(input string) PuzzleInput {
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	for scanner.Scan() {
+		line := scanner.Text()
+	}
+	return PuzzleInput{}
+}
+
+func part1() {
+	problem := Parse(input)
+	ans := 0
+	fmt.Println("answer:", ans)
+}
+
+func part2() {
+	problem := Parse(input)
+	ans := 0
+	fmt.Println("answer:", ans)
+}
+
+func main() {
+	util.RunChosenPart(part1, part2)
+}
