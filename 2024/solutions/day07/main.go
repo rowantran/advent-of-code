@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 
@@ -33,7 +32,7 @@ func Parse(input string) PuzzleInput {
 				if err != nil {
 					panic(err)
 				}
-				equation.target = big.NewInt(parsedNum)
+				equation.target = parsedNum
 			} else {
 				equation.vals = append(equation.vals, int64(util.MustAtoi(num)))
 			}
@@ -45,27 +44,25 @@ func Parse(input string) PuzzleInput {
 }
 
 type Equation struct {
-	target *big.Int
+	target int64
 	vals []int64
 }
 
 func (e Equation) isSatisfiable(allowConcatenation bool) bool {
-	return e.isSatisfiableHelper(allowConcatenation, big.NewInt(e.vals[0]), 1)
+	return e.isSatisfiableHelper(allowConcatenation, e.vals[0], 1)
 }
 
-func (e Equation) isSatisfiableHelper(allowConcatenation bool, partialResult *big.Int, nextIndex int) bool {
+func (e Equation) isSatisfiableHelper(allowConcatenation bool, partialResult int64, nextIndex int) bool {
 	// key observation: all vals are positive and only *, + operations are allowed, so
 	// our partial sum can only increase as we use more values
-	if partialResult.Cmp(e.target) == 0 {
+	if partialResult == e.target {
 		return true
-	} else if partialResult.Cmp(e.target) == 1 || nextIndex >= len(e.vals) {
+	} else if partialResult > e.target || nextIndex >= len(e.vals) {
 		return false
 	}
 
-	sum := new(big.Int).Add(partialResult, big.NewInt(e.vals[nextIndex]))
-	product := new(big.Int).Mul(partialResult, big.NewInt(e.vals[nextIndex]))
-	satisfiable := e.isSatisfiableHelper(allowConcatenation, sum, nextIndex+1) ||
-	               e.isSatisfiableHelper(allowConcatenation, product, nextIndex+1)
+	satisfiable := e.isSatisfiableHelper(allowConcatenation, partialResult + e.vals[nextIndex], nextIndex+1) ||
+	               e.isSatisfiableHelper(allowConcatenation, partialResult * e.vals[nextIndex], nextIndex+1)
 	if (allowConcatenation) {
 		concatenated := concatenate(partialResult, e.vals[nextIndex])
 		satisfiable = satisfiable || e.isSatisfiableHelper(allowConcatenation, concatenated, nextIndex+1)
@@ -87,14 +84,13 @@ func digits(a int64) int {
 }
 
 // concatenate(123, 456) = 123456
-func concatenate(a *big.Int, b int64) *big.Int {
-	ten := big.NewInt(10)
-	res := new(big.Int).Set(a)
+func concatenate(a int64, b int64) int64 {
+	res := a
 	for range digits(b) {
-		res.Mul(res, ten)
+		res *= 10
 	}
 
-	return res.Add(res, big.NewInt(b))
+	return res+b
 }
 
 func part1() {
@@ -104,7 +100,7 @@ func part1() {
 		//fmt.Println("checking equation", eqn)
 		if eqn.isSatisfiable(false) {
 			//fmt.Println("satisfied")
-			ans += eqn.target.Int64()
+			ans += eqn.target
 		}
 	}
 
@@ -118,7 +114,7 @@ func part2() {
 		//fmt.Println("checking equation", eqn)
 		if eqn.isSatisfiable(true) {
 			//fmt.Println("satisfied")
-			ans += eqn.target.Int64()
+			ans += eqn.target
 		}
 	}
 
