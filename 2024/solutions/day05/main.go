@@ -15,7 +15,7 @@ import (
 var input string
 
 type PuzzleInput struct {
-	rules [][2]int
+	rules   [][2]int
 	updates [][]int
 }
 

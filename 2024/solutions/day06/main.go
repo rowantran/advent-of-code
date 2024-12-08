@@ -14,7 +14,7 @@ import (
 var input string
 
 type PuzzleInput struct {
-	grid [][]Tile
+	grid     [][]Tile
 	startPos [2]int
 }
 
@@ -50,6 +50,7 @@ func Parse(input string) PuzzleInput {
 }
 
 type Tile int
+
 const (
 	Empty Tile = iota
 	Obstacle

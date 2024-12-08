@@ -42,6 +42,7 @@ func (h *TokenHeap) Pop() any {
 }
 
 type TokenType int
+
 const (
 	Mul TokenType = iota
 	Do
@@ -52,14 +53,14 @@ type Token struct {
 	index int
 	ttype TokenType
 	// fields below should only be used for Mul instructions
-	first int
+	first  int
 	second int
 }
 
 // match: output of FindAllStringSubmatchIndex on a string
 // submatchIndex: submatch index where 0 is the full match, 1 is first submatch etc.
 func getSubmatchString(str string, match []int, submatchIndex int) string {
-	submatchIndices := match[2*submatchIndex:2*submatchIndex+2]
+	submatchIndices := match[2*submatchIndex : 2*submatchIndex+2]
 	return str[submatchIndices[0]:submatchIndices[1]]
 }
 

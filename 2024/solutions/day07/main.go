@@ -15,7 +15,7 @@ import (
 var input string
 
 type PuzzleInput struct {
-	equations []Equation	
+	equations []Equation
 }
 
 func Parse(input string) PuzzleInput {
@@ -45,7 +45,7 @@ func Parse(input string) PuzzleInput {
 
 type Equation struct {
 	target int64
-	vals []int64
+	vals   []int64
 }
 
 func (e Equation) isSatisfiable(allowConcatenation bool) bool {
@@ -55,15 +55,16 @@ func (e Equation) isSatisfiable(allowConcatenation bool) bool {
 func (e Equation) isSatisfiableHelper(allowConcatenation bool, partialResult int64, nextIndex int) bool {
 	// key observation: all vals are positive and only *, + operations are allowed, so
 	// our partial sum can only increase as we use more values
-	if partialResult == e.target {
-		return true
-	} else if partialResult > e.target || nextIndex >= len(e.vals) {
+	if partialResult > e.target {
 		return false
 	}
+	if nextIndex == len(e.vals) {
+		return partialResult == e.target
+	}
 
-	satisfiable := e.isSatisfiableHelper(allowConcatenation, partialResult + e.vals[nextIndex], nextIndex+1) ||
-	               e.isSatisfiableHelper(allowConcatenation, partialResult * e.vals[nextIndex], nextIndex+1)
-	if (allowConcatenation) {
+	satisfiable := e.isSatisfiableHelper(allowConcatenation, partialResult+e.vals[nextIndex], nextIndex+1) ||
+		e.isSatisfiableHelper(allowConcatenation, partialResult*e.vals[nextIndex], nextIndex+1)
+	if allowConcatenation {
 		concatenated := concatenate(partialResult, e.vals[nextIndex])
 		satisfiable = satisfiable || e.isSatisfiableHelper(allowConcatenation, concatenated, nextIndex+1)
 	}
@@ -90,7 +91,7 @@ func concatenate(a int64, b int64) int64 {
 		res *= 10
 	}
 
-	return res+b
+	return res + b
 }
 
 func part1() {
