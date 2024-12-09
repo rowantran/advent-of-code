@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"slices"
 	"strings"
 
 	_ "embed"
@@ -27,12 +26,14 @@ func Parse(input string) PuzzleInput {
 func part1() {
 	problem := Parse(input)
 	ans := 0
+	fmt.Println(problem)
 	fmt.Println("answer:", ans)
 }
 
 func part2() {
 	problem := Parse(input)
 	ans := 0
+	fmt.Println(problem)
 	fmt.Println("answer:", ans)
 }
 
