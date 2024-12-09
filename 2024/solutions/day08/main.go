@@ -56,12 +56,7 @@ func (p PuzzleInput) Antinodes(p2 bool) util.Set[Vec2] {
 				if i <= j {
 					continue
 				}
-
-				for _, anti := range p.pairwiseAntinodes(a1, a2, p2) {
-					if p.IsValidLocation(anti) {
-						antinodes.Add(anti)
-					}
-				}
+				antinodes.AddAll(p.pairwiseAntinodes(a1, a2, p2))
 			}
 		}
 	}
@@ -73,33 +68,32 @@ func (p PuzzleInput) pairwiseAntinodes(a1 Vec2, a2 Vec2, p2 bool) []Vec2 {
 	delta := a2.Sub(a1)
 	var antinodes []Vec2
 
-	if p2 {
-		anti := a1
-		for i := 0; p.IsValidLocation(anti); {
+	// try to add a1 + delta*i, a1 + delta*(i + increment), a1 + delta*(i + 2*increment), ...
+	var addNodes = func(i int, increment int) {
+		for anti := a1.Add(delta.Mul(i)); p.IsValidLocation(anti); anti = a1.Add(delta.Mul(i)) {
 			antinodes = append(antinodes, anti)
-			i++
-			anti = a1.Add(delta.Mul(i))
+			i += increment
+			if increment == 0 {
+				break
+			}
 		}
+	}
 
-		anti = a1.Add(delta.Mul(-1))
-		for i := -1; p.IsValidLocation(anti); {
-			antinodes = append(antinodes, anti)
-			i--
-			anti = a1.Add(delta.Mul(i))
-		}
+	if p2 {
+		// add all points a1 + c*(a2-a1); c is an integer && the resulting point is in the grid
+
+		// input is constructed s.t. dx, dy := (delta[0], delta[1]) are coprime for all pairs of antennas
+		// otherwise, we would need to handle cases where fractional c would result in a valid
+		// coordinate, e.g. (dx,dy)=(2,2) -> a1 + 0.5(a2-a1) = a1 + {1, 1} is a collinear point with int coordinates
+		addNodes(0, 1)
+		addNodes(-1, -1)
 	} else {
-		antinodes = appendIfValid(antinodes, a2.Add(delta), p)
-		antinodes = appendIfValid(antinodes, a1.Sub(delta), p)
+		// same as above, but only consider c = -1, 2 because we need the point to be twice as far from
+		// one antenna as the other
+		addNodes(-1, 0)
+		addNodes(2, 0)
 	}
 	return antinodes
-}
-
-func appendIfValid(locs []Vec2, loc Vec2, p PuzzleInput) []Vec2 {
-	if p.IsValidLocation(loc) {
-		return append(locs, loc)
-	} else {
-		return locs
-	}
 }
 
 func part1() {
