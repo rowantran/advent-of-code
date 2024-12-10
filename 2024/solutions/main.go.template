@@ -10,17 +10,18 @@ import (
 	"github.com/rowantran/advent-of-code/2024/util"
 )
 
-//go:embed input
+//go:embed example_input
 var input string
 
 type PuzzleInput struct {}
 
 func Parse(input string) PuzzleInput {
+	var problem PuzzleInput
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	for scanner.Scan() {
 		line := scanner.Text()
 	}
-	return PuzzleInput{}
+	return problem
 }
 
 func part1() {
@@ -33,7 +34,6 @@ func part1() {
 func part2() {
 	problem := Parse(input)
 	ans := 0
-	fmt.Println(problem)
 	fmt.Println("answer:", ans)
 }
 
