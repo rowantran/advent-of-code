@@ -12,14 +12,14 @@ import (
 var input string
 
 type File struct {
-	id int
+	id           int
 	originalSize int
-	size int
+	size         int
 }
 
 type PuzzleInput struct {
 	files []File
-	gaps []int
+	gaps  []int
 }
 
 func Parse(input string) PuzzleInput {
@@ -31,8 +31,8 @@ func Parse(input string) PuzzleInput {
 			continue
 		}
 
-		if i % 2 == 0 {
-			problem.files = append(problem.files, File{i/2, size, size})
+		if i%2 == 0 {
+			problem.files = append(problem.files, File{i / 2, size, size})
 		} else {
 			problem.gaps = append(problem.gaps, size)
 		}
@@ -43,54 +43,51 @@ func Parse(input string) PuzzleInput {
 func (p PuzzleInput) CompactAndChecksum(allowFragmentation bool) int64 {
 	var ans int64
 
-	var processFile = func(i *int, file File, size int) {
-		end := *i + size
+	// starting at index i, fill in n locations with as much file content as possible,
+	// padding with empty space if needed
+	var processChunk = func(i *int, n int, file File) {
+		contentEnd := *i + file.size
+		end := *i + n
 		for ; *i < end; *i++ {
-			fmt.Printf("processing index %d with file id %d\n", *i, file.id)
-			ans += int64(*i * file.id)
+			//fmt.Printf("processing index %d with file id %d\n", *i, file.id)
+			if *i < contentEnd {
+				ans += int64(*i * file.id)
+			}
 		}
 	}
 
-	i := 0
-	for f, file := range p.files {
-		// pop and process next file from the beginning
-		processFile(&i, file, file.size)
-		if (file.size < file.originalSize) {
-			i += (file.originalSize - file.size)
+	var isValidFileForGap = func(gap int, i int) bool {
+		if p.files[i].size == 0 {
+			return false
 		}
+		return allowFragmentation || p.files[i].size <= gap
+	}
 
-		// process next gap:
-		// choose files from the end until the gap is filled, removing files if the remaining gap
-		// is larger than their full size
-		if len(p.gaps) == 0 {
+	i := 0
+	for f := range p.files {
+		// pop and process next file from the beginning
+		file := p.files[f]
+		processChunk(&i, file.originalSize, file)
+
+		// process next gap, if it exists
+		if f >= len(p.gaps) {
 			continue
 		}
-
-		gapToFill := p.gaps[0]
-		p.gaps = p.gaps[1:]
-		for gapToFill > 0 {
-			// if there are no remaining files to use, the rest of the gap will stay empty
-			var isValidFileForGap = func(i int) bool {
-				if p.files[i].size == 0 {
-					return false
-				}
-				return allowFragmentation || p.files[i].size <= gapToFill
-			}
-
+		gap := p.gaps[f]
+		for gap > 0 {
 			var j int
-			for j = len(p.files)-1; j > f && !isValidFileForGap(j); j-- {}
-			// no file was found
+			for j = len(p.files) - 1; j > f && !isValidFileForGap(gap, j); j-- {
+			}
+			// if no valid file was found, the rest of the gap will stay empty
 			if j <= f {
-				i += gapToFill
+				i += gap
 				break
 			}
 
-			file = p.files[j]
-			fileBlocksToUse := min(gapToFill, file.size)
-
-			processFile(&i, file, fileBlocksToUse)
-			gapToFill -= fileBlocksToUse
-			p.files[j].size -= fileBlocksToUse
+			filled := min(gap, p.files[j].size)
+			processChunk(&i, filled, p.files[j])
+			gap -= filled
+			p.files[j].size -= filled
 		}
 	}
 
