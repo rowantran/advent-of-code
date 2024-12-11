@@ -17,3 +17,7 @@ func Abs(i int) int {
 		return i
 	}
 }
+
+func RuneToInt(r rune) int {
+	return int(r - '0')
+}

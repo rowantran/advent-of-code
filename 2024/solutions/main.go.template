@@ -32,7 +32,7 @@ func part1() {
 }
 
 func part2() {
-	problem := Parse(input)
+	//problem := Parse(input)
 	ans := 0
 	fmt.Println("answer:", ans)
 }
