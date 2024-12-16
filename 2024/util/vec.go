@@ -13,3 +13,7 @@ func (v Vec2) Mul(c int) Vec2 {
 func (a Vec2) Sub(b Vec2) Vec2 {
 	return a.Add(b.Mul(-1))
 }
+
+func (v Vec2) Parts() (int, int) {
+	return v[0], v[1]
+}

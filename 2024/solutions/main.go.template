@@ -10,9 +10,6 @@ import (
 	"github.com/rowantran/advent-of-code/2024/util"
 )
 
-//go:embed example_input
-var input string
-
 type PuzzleInput struct {}
 
 func Parse(input string) PuzzleInput {
@@ -24,16 +21,23 @@ func Parse(input string) PuzzleInput {
 	return problem
 }
 
+func solve(p PuzzleInput) int {
+	return 0
+}
+
+//go:embed example_input
+var input string
+
 func part1() {
 	problem := Parse(input)
-	ans := 0
 	fmt.Println(problem)
+	ans := solve(problem)
 	fmt.Println("answer:", ans)
 }
 
 func part2() {
-	//problem := Parse(input)
-	ans := 0
+	problem := Parse(input)
+	ans := solve(problem)
 	fmt.Println("answer:", ans)
 }
 
