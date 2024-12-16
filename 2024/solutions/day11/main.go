@@ -30,21 +30,21 @@ func solve(p PuzzleInput, iterations int) int {
 	for range iterations {
 		// stone transformations are "simultaneous" so we can't mutate the counts map in-place
 		deltas := make(map[int64]int)
-		
+
 		for k, v := range p.counts {
 			deltas[k] -= v
 
 			switch {
 			case k == 0:
 				deltas[1] += v
-			case util.DigitCountInt64(k) % 2 == 0:
+			case util.DigitCountInt64(k)%2 == 0:
 				left, right := splitNum(k)
 				deltas[left] += v
 				deltas[right] += v
 			default:
 				deltas[2024*k] += v
 			}
-		}	
+		}
 
 		for k, v := range deltas {
 			p.counts[k] += v
@@ -55,7 +55,7 @@ func solve(p PuzzleInput, iterations int) int {
 
 		//fmt.Printf("completed iteration #%d: %v\n", i+1, p.counts)
 	}
-	
+
 	sum := 0
 	for _, v := range p.counts {
 		sum += v

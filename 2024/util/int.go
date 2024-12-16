@@ -19,7 +19,7 @@ func MustAtoiInt64(s string) int64 {
 }
 
 func Abs(i int) int {
-	if (i < 0) {
+	if i < 0 {
 		return -i
 	} else {
 		return i

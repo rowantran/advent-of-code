@@ -54,7 +54,7 @@ func solve(p PuzzleInput) int {
 	for i := range len(p.grid) {
 		visited[i] = make([]bool, len(p.grid[i]))
 	}
-	
+
 	result := 0
 	for i := range len(p.grid) {
 		for j := range len(p.grid[i]) {
@@ -74,7 +74,7 @@ func dfs(p PuzzleInput, visited [][]bool, pos Vec2) (int, int) {
 
 	neighbors := p.SameValuedNeighbors(pos)
 	// perimeter contributed by pos = number of adjacent tiles that aren't neighbors
-	area, perimeter := 1, len(directions) - len(neighbors)
+	area, perimeter := 1, len(directions)-len(neighbors)
 	for _, neighbor := range neighbors {
 		nr, nc := neighbor.Parts()
 		if !visited[nr][nc] {
