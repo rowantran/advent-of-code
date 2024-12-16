@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"strings"
 
 	_ "embed"
 
@@ -14,31 +12,14 @@ type Vec2 = util.Vec2
 
 var directions = []Vec2{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
 
-type PuzzleInput struct {
-	grid [][]rune
-}
+type PuzzleInput = util.Grid
 
 func Parse(input string) PuzzleInput {
-	var problem PuzzleInput
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	for scanner.Scan() {
-		problem.grid = append(problem.grid, []rune(scanner.Text()))
-	}
-	return problem
-}
-
-func (p PuzzleInput) Get(pos Vec2) rune {
-	r, c := pos.Parts()
-	return p.grid[r][c]
-}
-
-func (p PuzzleInput) InBounds(pos Vec2) bool {
-	r, c := pos.Parts()
-	return r >= 0 && r < len(p.grid) && c >= 0 && c < len(p.grid[0])
+	return util.NewGridFromString(input)
 }
 
 // return directions of adjacent tiles with same value, i.e. adjacent tiles in the same region
-func (p PuzzleInput) SameValuedNeighborDirections(pos Vec2) []Vec2 {
+func sameValuedNeighborDirections(p PuzzleInput, pos Vec2) []Vec2 {
 	var neighborDirs []Vec2
 	for _, dir := range directions {
 		neighbor := pos.Add(dir)
@@ -52,11 +33,11 @@ func (p PuzzleInput) SameValuedNeighborDirections(pos Vec2) []Vec2 {
 // count corners contributed by the tile to its respective region, using the following scheme:
 // * external corners (where one tile has 2 exposed borders) are counted on that tile
 // * internal corners (where 3 tiles form an L shape) are counted at the connecting tile
-func (p PuzzleInput) Corners(pos Vec2) int {
+func countCorners(p PuzzleInput, pos Vec2) int {
 	corners := 0
 
 	// count external corners
-	neighborDirs := p.SameValuedNeighborDirections(pos)
+	neighborDirs := sameValuedNeighborDirections(p, pos)
 	switch len(neighborDirs) {
 	case 0:
 		// special case where we just have a lone tile
@@ -86,14 +67,14 @@ func (p PuzzleInput) Corners(pos Vec2) int {
 }
 
 func solve(p PuzzleInput, part2 bool) int {
-	visited := make([][]bool, len(p.grid))
-	for i := range len(p.grid) {
-		visited[i] = make([]bool, len(p.grid[i]))
+	visited := make([][]bool, len(p))
+	for i := range len(p) {
+		visited[i] = make([]bool, len(p[i]))
 	}
 
 	result := 0
-	for i := range len(p.grid) {
-		for j := range len(p.grid[i]) {
+	for i := range len(p) {
+		for j := range len(p[i]) {
 			if !visited[i][j] {
 				area, perimeter, corners := dfs(p, visited, Vec2{i, j})
 				if part2 {
@@ -112,9 +93,9 @@ func dfs(p PuzzleInput, visited [][]bool, pos Vec2) (int, int, int) {
 	r, c := pos.Parts()
 	visited[r][c] = true
 
-	neighborDirs := p.SameValuedNeighborDirections(pos)
+	neighborDirs := sameValuedNeighborDirections(p, pos)
 	// perimeter contributed by pos = number of adjacent tiles that aren't neighbors
-	area, perimeter, corners := 1, len(directions)-len(neighborDirs), p.Corners(pos)
+	area, perimeter, corners := 1, len(directions)-len(neighborDirs), countCorners(p, pos)
 	for _, dir := range neighborDirs {
 		neighbor := pos.Add(dir)
 		nr, nc := neighbor.Parts()
