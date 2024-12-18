@@ -89,14 +89,25 @@ func machineCost(m MachineInfo) *int64 {
 
 	xNum := (t1*b0 - t0*b1)
 	xDen := (a1*b0 - a0*b1)
-	if xDen == 0 || xNum%xDen != 0 {
+	if xDen == 0 {
+		// xDen = bc-ad = -det A, so if xDen = 0 then det A = 0 and A is singular
+		// the test case doesn't have any singular matrices so we don't need to handle this
+		return nil
+	} else if xNum%xDen != 0 {
+		// non-integer solution
 		return nil
 	}
 	x := xNum / xDen
 
 	yNum := (t0 - x*a0)
 	yDen := b0
-	if yDen == 0 || yNum%yDen != 0 {
+	if yDen == 0 {
+		// not sure if this case represents something special, but there is
+		// still a unique solution so we can find y by back-substituting x into
+		// the second equation, i.e. calculate y := (t1 - x*a1) / b1
+		return nil
+	} else if yNum%yDen != 0 {
+		// non-integer solution
 		return nil
 	}
 	y := yNum / yDen
