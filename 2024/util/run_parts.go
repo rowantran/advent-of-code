@@ -16,7 +16,6 @@ func RunChosenPart(part1Handler func(), part2Handler func()) {
 	flag.Parse()
 
 	fmt.Println("running part", *part)
-	divider()
 
 	start := time.Now()
 	if *part == 1 {
@@ -26,6 +25,11 @@ func RunChosenPart(part1Handler func(), part2Handler func()) {
 	}
 	runtime := time.Since(start)
 
-	divider()
 	fmt.Println("took", runtime)
+}
+
+func SolveChosenPart(handler func(bool) int64) {
+	var ans int64
+	RunChosenPart(func() { ans = handler(false) }, func() { ans = handler(true) })
+	fmt.Println("answer:", ans)
 }

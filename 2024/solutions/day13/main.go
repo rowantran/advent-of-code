@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"strings"
 
 	_ "embed"
@@ -110,19 +109,9 @@ func machineCost(m MachineInfo) *int64 {
 //go:embed input
 var input string
 
-func part1() {
-	problem := Parse(input, false)
-	//fmt.Println(problem)
-	ans := solve(problem)
-	fmt.Println("answer:", ans)
-}
-
-func part2() {
-	problem := Parse(input, true)
-	ans := solve(problem)
-	fmt.Println("answer:", ans)
-}
-
 func main() {
-	util.RunChosenPart(part1, part2)
+	util.SolveChosenPart(func(isPart2 bool) int64 {
+		problem := Parse(input, isPart2)
+		return solve(problem)
+	})
 }

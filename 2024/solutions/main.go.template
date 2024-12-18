@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"strings"
 
 	_ "embed"
@@ -10,7 +9,7 @@ import (
 	"github.com/rowantran/advent-of-code/2024/util"
 )
 
-type PuzzleInput struct {}
+type PuzzleInput struct{}
 
 func Parse(input string) PuzzleInput {
 	var problem PuzzleInput
@@ -21,26 +20,17 @@ func Parse(input string) PuzzleInput {
 	return problem
 }
 
-func solve(p PuzzleInput) int {
+func solve(p PuzzleInput, isPart2 bool) int64 {
 	return 0
 }
 
 //go:embed example_input
 var input string
 
-func part1() {
-	problem := Parse(input)
-	fmt.Println(problem)
-	ans := solve(problem)
-	fmt.Println("answer:", ans)
-}
-
-func part2() {
-	problem := Parse(input)
-	ans := solve(problem)
-	fmt.Println("answer:", ans)
-}
-
 func main() {
-	util.RunChosenPart(part1, part2)
+	util.SolveChosenPart(func(isPart2 bool) int64 {
+		problem := Parse(input)
+		fmt.Println(problem)
+		return solve(problem, isPart2)
+	})
 }
