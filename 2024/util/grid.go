@@ -16,12 +16,12 @@ func NewGridFromString(input string) Grid {
 	return grid
 }
 
-func (g Grid) Get(pos Vec2) rune {
+func (g Grid) Get(pos Vec2[int]) rune {
 	r, c := pos.Parts()
 	return g[r][c]
 }
 
-func (g Grid) InBounds(pos Vec2) bool {
+func (g Grid) InBounds(pos Vec2[int]) bool {
 	r, c := pos.Parts()
 	return r >= 0 && r < len(g) && c >= 0 && c < len(g[0])
 }
