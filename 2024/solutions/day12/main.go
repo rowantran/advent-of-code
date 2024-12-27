@@ -8,14 +8,14 @@ import (
 	"github.com/rowantran/advent-of-code/2024/util"
 )
 
-type Vec2 = util.Vec2
+type Vec2 = util.Vec2[int]
 
 var directions = []Vec2{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
 
-type PuzzleInput = util.Grid
+type PuzzleInput = util.Grid[rune]
 
 func Parse(input string) PuzzleInput {
-	return util.NewGridFromString(input)
+	return util.NewGridFromString[rune](input, func(r rune) rune { return r })
 }
 
 // return directions of adjacent tiles with same value, i.e. adjacent tiles in the same region
