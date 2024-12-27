@@ -26,6 +26,11 @@ func (g Grid[T]) Get(pos Vec2[int]) T {
 	return g[r][c]
 }
 
+func (g Grid[T]) Set(pos Vec2[int], val T) {
+	r, c := pos.Parts()
+	g[r][c] = val
+}
+
 func (g Grid[T]) InBounds(pos Vec2[int]) bool {
 	r, c := pos.Parts()
 	return r >= 0 && r < len(g) && c >= 0 && c < len(g[0])
