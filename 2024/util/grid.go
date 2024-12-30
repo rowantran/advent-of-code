@@ -35,3 +35,12 @@ func (g Grid[T]) InBounds(pos Vec2[int]) bool {
 	r, c := pos.Parts()
 	return r >= 0 && r < len(g) && c >= 0 && c < len(g[0])
 }
+
+func (g Grid[T]) Copy() Grid[T] {
+	newGrid := make(Grid[T], len(g))
+	for i, row := range g {
+		newGrid[i] = make([]T, len(row))
+		copy(newGrid[i], row)
+	}
+	return newGrid
+}
