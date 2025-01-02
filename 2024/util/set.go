@@ -33,14 +33,14 @@ func (s Set[T]) String() string {
 	i := 0
 	for key := range s {
 		res += fmt.Sprintf("%v", key)
-		// if printing last element
-		if i+1 == s.Size() {
-			res += "}"
-		} else {
+		// separator unless last element
+		if i+1 != s.Size() {
 			res += ", "
 		}
 		i += 1
 	}
+
+	res += "}"
 
 	return res
 }

@@ -55,23 +55,33 @@ type PuzzleNodeHeapItem struct {
 func solve(p PuzzleInput, isPart2 bool) int64 {
 	dists, prevs := dijkstra(p)
 
-	if !isPart2 {
-		res := math.MaxInt
-		for _, dir := range directions {
-			res = min(res, dists[PuzzleNode{p.end, dir}])
+	minDistance := math.MaxInt
+	endNodes := []PuzzleNode{}
+	for _, dir := range directions {
+		node := PuzzleNode{p.end, dir}
+		if dists[node] < minDistance {
+			minDistance = dists[node]
+			endNodes = []PuzzleNode{node}
+		} else if dists[node] == minDistance {
+			endNodes = append(endNodes, node)
 		}
-		return int64(res)
+	}
+
+	if !isPart2 {
+		return int64(minDistance)
 	} else {
 		tiles := make(util.Set[Vec2])		
-		tracePaths(prevs, PuzzleNode{p.start, Vec2{0,1}}, tiles)
+		for _, node := range endNodes {
+			tracePaths(prevs, node, tiles)
+		}
 		return int64(tiles.Size())
 	}
 }
 
 // collect all tiles on path(s) to the target node
 func tracePaths(prevs map[PuzzleNode][]PuzzleNode, node PuzzleNode, tiles util.Set[Vec2]) {
+	tiles.Add(node.location)
 	for _, prev := range prevs[node] {
-		tiles.Add(prev.location)
 		tracePaths(prevs, prev, tiles)
 	}
 }
