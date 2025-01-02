@@ -2,7 +2,7 @@ package util
 
 import "strings"
 
-type Vec2 [T ~int|~int64] [2]T
+type Vec2[T ~int | ~int64] [2]T
 
 // parse a Vec2[int] from string in format "x,y"
 func NewVec2Int(str string) Vec2[int] {

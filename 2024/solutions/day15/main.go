@@ -15,11 +15,11 @@ type Vec2 = util.Vec2[int]
 type Tile rune
 
 const (
-	Empty Tile = '.'
-	Wall = '#'
-	Robot = '@'
-	Box = '['
-	BoxRight = ']'
+	Empty    Tile = '.'
+	Wall          = '#'
+	Robot         = '@'
+	Box           = '['
+	BoxRight      = ']'
 )
 
 var runeToTile = map[rune]Tile{
@@ -55,12 +55,12 @@ func Parse(input string, isPart2 bool) PuzzleInput {
 				row[i*2] = runeToTile[r]
 				switch runeToTile[r] {
 				case Robot:
-					problem.robotPos = Vec2{len(problem.grid), i*2}
-					row[i*2 + 1] = Empty
+					problem.robotPos = Vec2{len(problem.grid), i * 2}
+					row[i*2+1] = Empty
 				case Box:
-					row[i*2 + 1] = BoxRight
+					row[i*2+1] = BoxRight
 				default:
-					row[i*2 + 1] = row[i*2]
+					row[i*2+1] = row[i*2]
 				}
 			}
 			problem.grid = append(problem.grid, row)
@@ -73,7 +73,7 @@ func Parse(input string, isPart2 bool) PuzzleInput {
 			return runeToTile[r]
 		})
 	}
-	
+
 	scan := bufio.NewScanner(strings.NewReader(parts[1]))
 	for scan.Scan() {
 		line := scan.Text()
@@ -120,7 +120,7 @@ func printGrid(grid util.Grid[Tile]) {
 	}
 }
 
-// returns whether the given tile was successfully moved out of the way, 
+// returns whether the given tile was successfully moved out of the way,
 // updating the passed-in grid
 // if first val is false, the grid should be considered invalid
 func tryMove(grid *util.Grid[Tile], pos Vec2, dir Vec2, moveOnlySingle bool) bool {
@@ -137,7 +137,7 @@ func tryMove(grid *util.Grid[Tile], pos Vec2, dir Vec2, moveOnlySingle bool) boo
 	isDoubleBoxLeft := !moveOnlySingle && (tile == Box) && (grid.Get(pos.Add(Vec2{0, 1})) == BoxRight)
 	isDoubleBoxRight := !moveOnlySingle && (tile == BoxRight)
 
-	// set the original spot to empty before recursing to other side of double box, since 
+	// set the original spot to empty before recursing to other side of double box, since
 	// the other side could end up moving into the original spot and we don't want to override it
 	// e.g. if we call tryMove on the left side of a box while moving left
 	grid.Set(pos, Empty)

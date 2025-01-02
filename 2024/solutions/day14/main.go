@@ -45,7 +45,7 @@ func (r Robot) FinalPos(seconds int) Vec2 {
 }
 
 func mod(a int, b int) int {
-	return ((a%b)+b)%b
+	return ((a % b) + b) % b
 }
 
 type PuzzleInput struct {
@@ -63,8 +63,8 @@ func Parse(input string) PuzzleInput {
 }
 
 type PuzzleImage struct {
-	p PuzzleInput
-	seconds int
+	p          PuzzleInput
+	seconds    int
 	imageCache map[int][][]bool
 }
 
@@ -138,7 +138,7 @@ func solve(p PuzzleInput) int64 {
 
 func writeAllImages(p PuzzleInput) {
 	image := PuzzleImage{
-		p: p,
+		p:          p,
 		imageCache: make(map[int][][]bool),
 	}
 	for i := range max(width, height) {
@@ -153,7 +153,7 @@ func writeAllImages(p PuzzleInput) {
 //go:embed input
 var input string
 
-//const width, height = 11, 7
+// const width, height = 11, 7
 const width, height = 101, 103
 const t = 7861
 

@@ -10,17 +10,18 @@ import (
 )
 
 type Vec2 = util.Vec2[int]
+
 var directions = []Vec2{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
 
 type PuzzleInput struct {
-	maze util.Grid[rune]
+	maze  util.Grid[rune]
 	start Vec2
-	end Vec2
+	end   Vec2
 }
 
 func Parse(input string) PuzzleInput {
 	var p PuzzleInput
-	p.maze = util.NewGridFromString(input, func (r rune, pos Vec2) rune {
+	p.maze = util.NewGridFromString(input, func(r rune, pos Vec2) rune {
 		if r == 'S' {
 			p.start = pos
 		} else if r == 'E' {
@@ -31,7 +32,7 @@ func Parse(input string) PuzzleInput {
 	return p
 }
 
-func (p PuzzleInput) Neighbors(pos Vec2) []Vec2{
+func (p PuzzleInput) Neighbors(pos Vec2) []Vec2 {
 	neighbors := make([]Vec2, 0)
 	for _, dir := range directions {
 		n := pos.Add(dir)
@@ -43,12 +44,12 @@ func (p PuzzleInput) Neighbors(pos Vec2) []Vec2{
 }
 
 type PuzzleNode struct {
-	location Vec2
+	location  Vec2
 	direction Vec2
 }
 
 type PuzzleNodeHeapItem struct {
-	node PuzzleNode
+	node     PuzzleNode
 	distance int
 }
 
@@ -70,7 +71,7 @@ func solve(p PuzzleInput, isPart2 bool) int64 {
 	if !isPart2 {
 		return int64(minDistance)
 	} else {
-		tiles := make(util.Set[Vec2])		
+		tiles := make(util.Set[Vec2])
 		for _, node := range endNodes {
 			tracePaths(prevs, node, tiles)
 		}
@@ -94,13 +95,15 @@ func dijkstra(p PuzzleInput) (map[PuzzleNode]int, map[PuzzleNode][]PuzzleNode) {
 	for r := range len(p.maze) {
 		for c := range len(p.maze[r]) {
 			for _, dir := range directions {
-				if p.maze[r][c] == '#' { continue }
+				if p.maze[r][c] == '#' {
+					continue
+				}
 
 				dist := math.MaxInt
 				if (p.maze[r][c] == 'S' && dir == Vec2{0, 1}) {
 					dist = 0
 				}
-				node := PuzzleNode{Vec2{r,c}, dir}
+				node := PuzzleNode{Vec2{r, c}, dir}
 				dists[node] = dist
 				heap.Push(&pq, PuzzleNodeHeapItem{node, dist})
 			}

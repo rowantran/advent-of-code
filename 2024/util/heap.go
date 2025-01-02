@@ -3,15 +3,15 @@ package util
 import "container/heap"
 
 type Heap[T comparable] struct {
-	data []T
-	indices map[T]int
+	data     []T
+	indices  map[T]int
 	lessFunc func(T, T) bool
 }
 
 func NewHeap[T comparable](lessFunc func(T, T) bool) Heap[T] {
 	return Heap[T]{
-		data: make([]T, 0),
-		indices: make(map[T]int),
+		data:     make([]T, 0),
+		indices:  make(map[T]int),
 		lessFunc: lessFunc,
 	}
 }
