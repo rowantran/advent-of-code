@@ -12,16 +12,16 @@ import (
 )
 
 type Computer struct {
-	regs [3]int
+	regs    [3]int
 	program []int
-	ip int
+	ip      int
 }
 
 func Parse(input string) Computer {
 	var c Computer
 
 	parts := strings.Split(input, "\n\n")
-	
+
 	reg := 0
 	scanner := bufio.NewScanner(strings.NewReader(parts[0]))
 	for scanner.Scan() {
@@ -82,6 +82,15 @@ func (c *Computer) Run() []int {
 	return output
 }
 
+func (c *Computer) RunAndPrint() {
+	output := c.Run()
+	outputStrings := make([]string, len(output))
+	for i := range output {
+		outputStrings[i] = strconv.Itoa(output[i])
+	}
+	fmt.Println(strings.Join(outputStrings, ","))
+}
+
 func (c *Computer) parseCombo(arg int) int {
 	switch {
 	case arg <= 3:
@@ -104,7 +113,7 @@ func (c *Computer) bxl(arg int) int {
 
 func (c *Computer) bst(arg int) int {
 	arg = c.parseCombo(arg)
-	return arg%8
+	return arg % 8
 }
 
 func (c *Computer) jnz(arg int) int {
@@ -119,24 +128,51 @@ func (c *Computer) bxc() int {
 	return c.regs[1] ^ c.regs[2]
 }
 
-func solve(c Computer, isPart2 bool) int64 {
-	output := c.Run()
-	outputStrings := make([]string, len(output))
-	for i := range output {
-		outputStrings[i] = strconv.Itoa(output[i])
+func solveQuine(c Computer) int {
+	a := solveQuineRec(c, 0, 0)
+	return a
+}
+
+// invariant: A generates the last i opcodes of the program successfully
+func solveQuineRec(c Computer, a int, i int) int {
+	if i == len(c.program) {
+		return a
 	}
-	fmt.Println(strings.Join(outputStrings, ","))
+
+	// try to find a value of n for the next 3 bits of A which will successfully generate
+	// the opcode at index i (counting from the back)
+	for n := range 8 {
+		an := a*8 + n
+		testComputer := c
+		testComputer.regs[0] = an
+		output := testComputer.Run()
+		if output[len(output)-1-i] == c.program[len(c.program)-1-i] {
+			// A_n is a valid extension of A to generate the last i+1 opcodes successfully
+			an = solveQuineRec(c, an, i+1)
+			if an != 0 {
+				return an
+			}
+		}
+	}
 
 	return 0
 }
 
-//go:embed example_input_2
+//go:embed input
 var input string
 
 func main() {
 	util.SolveChosenPart(func(isPart2 bool) int64 {
-		problem := Parse(input)
+		computer := Parse(input)
 		//fmt.Println(problem)
-		return solve(problem, isPart2)
+		if isPart2 {
+			a := solveQuine(computer)
+			computer.regs[0] = a
+			computer.RunAndPrint()
+			return int64(a)
+		} else {
+			computer.RunAndPrint()
+			return int64(0)
+		}
 	})
 }
