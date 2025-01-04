@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"strings"
 
 	_ "embed"
@@ -50,7 +51,7 @@ type BfsQueueEntry struct {
 	depth int
 }
 
-func bfs(p PuzzleInput, grid util.Grid[bool]) int {
+func bfs(grid util.Grid[bool]) int {
 	visited := make(map[Vec2]bool)
 	queue := []BfsQueueEntry{{Vec2{0,0},0}}
 	for len(queue) > 0 {
@@ -77,11 +78,29 @@ func bfs(p PuzzleInput, grid util.Grid[bool]) int {
 	return -1
 }
 
+func findFirstBlockingByte(p PuzzleInput) Vec2 {
+	// search for the first value where we cannot find an exit using bytes [0, n)
+	// that means blocker n-1 is the first blocking byte
+	lo, hi := 0, len(p.bytes)
+	for lo < hi {
+		mid := (lo+hi)/2
+		success := bfs(p.GenerateGrid(mid)) != -1
+		if success {
+			lo = mid+1
+		} else {
+			hi = mid
+		}
+	}
+	
+	return p.bytes[lo-1]
+}
+
 func solve(p PuzzleInput, isPart2 bool) int64 {
 	if !isPart2 {
 		grid := p.GenerateGrid(1024)
-		return int64(bfs(p, grid))
+		return int64(bfs(grid))
 	} else {
+		fmt.Println(findFirstBlockingByte(p))
 		return 0
 	}
 }
